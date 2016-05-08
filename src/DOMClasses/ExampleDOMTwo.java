@@ -11,31 +11,19 @@ import javax.persistence.Table;
 @Table(name="ExampleDomTwo")
 public class ExampleDOMTwo {
 
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", unique = true, nullable = false)
-	public int id;
-	
-	public long objId;
+	@Id
+    @Column(name = "objId", unique = true, nullable = false)
+    public long objId;
 	public String name;
 	
 	public ExampleDOMTwo(long objId, String name) {
 		this.objId = objId;
 		this.name = name;
 	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-	public int getId() {
-		return id;
-	}
 	
 	public void setObjId(long objId) {
 		this.objId = objId;
 	}
-	@Column(name = "objId")
 	public long getObjId() {
 		return objId;
 	}

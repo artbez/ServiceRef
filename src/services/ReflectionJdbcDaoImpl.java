@@ -3,20 +3,29 @@ package services;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import javax.jws.WebService;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 
-import DOMClasses.ExampleDOMTwo;
+import Util.HibernateSessionFactory;
 
 public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 
 	@Override
 	public void insert(T object) {
+		// TODO Auto-generated method stub
+		
+		Session session = HibernateSessionFactory.getSessionFactory().openSession(); 
+		session.beginTransaction();
+		session.save(object);
+		session.getTransaction().commit();
+	    session.close();
+		System.out.println("successfully saved"); 
+	}
+
+	@Override
+	public void update(T object) {
 		// TODO Auto-generated method stub
 		Class<? extends Object> clazz = object.getClass();
 		System.out.println(clazz.getSimpleName());
@@ -24,32 +33,39 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 		String fi = "";
 		for (Field field : fields) {
 			if (!field.getName().equals("id")) {
-			System.out.println(field.getName());
-			fi += field.getName() + ",";}
+			try {
+				
+				fi += field.getName() + " = \'" + field.get(object) + "\',";
+				
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}
 		}
-		fi = fi.substring(0, fi.length() - 1);
-		System.out.println("fi = " + fi);
-		Configuration cfg=new Configuration(); 
-		cfg.configure("hibernate.cfg.xml");
-		//populates the data of the configuration file	
-		//creating seession factory object 
-		SessionFactory factory=cfg.buildSessionFactory();	
-		//creating session object 
-		Session session=factory.openSession(); 
-		//Query query = session.createQuery("insert into :className ( :fields )");
-		//System.out.println(query.toString());
-		//query.setParameter("className", clazz.getSimpleName());
-		//query.setParameter("fields", fi);
-		//System.out.println(query.toString());
-		//int result = query.executeUpdate();
-		session.save(object);
-		System.out.println("successfully saved"); 
-	}
-
-	@Override
-	public void update(T object) {
-		// TODO Auto-generated method stub
 		
+		Session session = HibernateSessionFactory.getSessionFactory().openSession();
+		 
+		Transaction tx = session.beginTransaction();
+		fi = fi.substring(0, fi.length() - 1);
+		
+		String str = " set " + fi + 
+				" where id = :id";
+		Query query = session.createQuery("update " + clazz.getSimpleName() + str);//" set name = 'lal' where objId = :id");
+			
+		try {
+			query.setParameter("id", clazz.getField("objId").get(object));
+		} catch (IllegalArgumentException | IllegalAccessException 
+				| NoSuchFieldException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int result = query.executeUpdate();
+		tx.commit();
+		session.close();
 	}
 
 	@Override

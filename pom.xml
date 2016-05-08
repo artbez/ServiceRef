@@ -20,6 +20,12 @@
     </plugins>
   </build>
   <dependencies>
+ 	<dependency>
+		<groupId>javax.transaction</groupId>
+		<artifactId>jta</artifactId>
+		<version>1.1</version>
+	</dependency>
+ 
  
         <!--driver for connection to MYSql database -->
         <dependency>
@@ -74,6 +80,16 @@
             <artifactId>hibernate-ehcache</artifactId>
             <version>${hibernate-version}</version>
         </dependency>
+        <dependency>
+    		<groupId>org.hibernate</groupId>
+    		<artifactId>hibernate-commons-annotations</artifactId>
+    		<version>3.3.0.ga</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.hibernate</groupId>
+    		<artifactId>hibernate-annotations</artifactId>
+    		<version>3.5.6-Final</version>
+		</dependency>
         <!--END Hibernate -->
  
     </dependencies>
