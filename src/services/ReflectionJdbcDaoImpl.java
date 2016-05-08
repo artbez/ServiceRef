@@ -28,34 +28,23 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 	public void update(T object) {
 		// TODO Auto-generated method stub
 		Class<? extends Object> clazz = object.getClass();
-		System.out.println(clazz.getSimpleName());
 		Field[] fields = clazz.getFields();
 		String fi = "";
-		for (Field field : fields) {
-			if (!field.getName().equals("id")) {
+		for (Field field : fields)
 			try {
-				
 				fi += field.getName() + " = \'" + field.get(object) + "\',";
-				
-			} catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException | IllegalAccessException e1) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				e1.printStackTrace();
 			}
-			}
-		}
 		
 		Session session = HibernateSessionFactory.getSessionFactory().openSession();
 		 
 		Transaction tx = session.beginTransaction();
 		fi = fi.substring(0, fi.length() - 1);
 		
-		String str = " set " + fi + 
-				" where id = :id";
-		Query query = session.createQuery("update " + clazz.getSimpleName() + str);//" set name = 'lal' where objId = :id");
-			
+		String str = " set " + fi +	" where id = :id";
+		Query query = session.createQuery("update " + clazz.getSimpleName() + str);
 		try {
 			query.setParameter("id", clazz.getField("objId").get(object));
 		} catch (IllegalArgumentException | IllegalAccessException 
@@ -70,7 +59,23 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 
 	@Override
 	public void deleteByKey(T key) {
-		// TODO Auto-generated method stub
+		Class<? extends Object> clazz = key.getClass();
+		
+		Session session = HibernateSessionFactory.getSessionFactory().openSession();
+		 
+		Transaction tx = session.beginTransaction();
+		
+		Query query = session.createQuery("delete " + clazz.getSimpleName() 
+				+ " where objId = :id");
+		try {
+			query.setParameter("id", clazz.getField("objId").get(key));
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int result = query.executeUpdate();
+		tx.commit();
+		session.close();
 		
 	}
 

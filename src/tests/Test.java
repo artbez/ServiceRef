@@ -9,6 +9,6 @@ public class Test {
 	public static void main(String[] args) {
 		ReflectionJdbcDaoImpl<ExampleDOMTwo> myRefService = new ReflectionJdbcDaoImpl<>();
 		ExampleDOMTwo myEx = new ExampleDOMTwo(1, "name3");
-		myRefService.update(myEx);
+		myRefService.deleteByKey(myEx);
 	}
 }
