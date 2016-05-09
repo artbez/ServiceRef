@@ -21,7 +21,6 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 		session.save(object);
 		session.getTransaction().commit();
 	    session.close();
-		System.out.println("successfully saved"); 
 	}
 
 	@Override
