@@ -2,26 +2,15 @@ package services;
 
 import java.util.List;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
+public interface ReflectionJdbcDao<T> {
 
-@WebService
-@SOAPBinding(style = SOAPBinding.Style.RPC)
-public interface ReflectionJdbcDao<SpecialDOM> {
+	public void insert(T object);
+	
+	public void update(T object);
+	
+	public void deleteByKey(T key);
+	
+	public T selectByKey(T key);
 
-	@WebMethod
-	public void insert(SpecialDOM object);
-	
-	@WebMethod
-	public void update(SpecialDOM object);
-	
-	@WebMethod
-	public void deleteByKey(SpecialDOM key);
-	
-	@WebMethod
-	public SpecialDOM selectByKey(SpecialDOM key);
-	
-	@WebMethod
-	List<SpecialDOM> selectAll();
+	public List<T> selectAll(Class<?> clazz);
 }

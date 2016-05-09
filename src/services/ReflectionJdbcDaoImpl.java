@@ -52,7 +52,7 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int result = query.executeUpdate();
+		query.executeUpdate();
 		tx.commit();
 		session.close();
 	}
@@ -60,11 +60,8 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 	@Override
 	public void deleteByKey(T key) {
 		Class<? extends Object> clazz = key.getClass();
-		
 		Session session = HibernateSessionFactory.getSessionFactory().openSession();
-		 
 		Transaction tx = session.beginTransaction();
-		
 		Query query = session.createQuery("delete " + clazz.getSimpleName() 
 				+ " where objId = :id");
 		try {
@@ -73,22 +70,41 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int result = query.executeUpdate();
+		query.executeUpdate();
 		tx.commit();
 		session.close();
-		
 	}
 
 	@Override
 	public T selectByKey(T key) {
 		// TODO Auto-generated method stub
-		return null;
+		Class<? extends Object> clazz = key.getClass();
+		Session session = HibernateSessionFactory.getSessionFactory().openSession();
+		Transaction tx = session.beginTransaction();
+		Query query = session.createQuery("from " + clazz.getSimpleName() 
+				+ " where objId = :id");
+		try {
+			query.setParameter("id", clazz.getField("objId").get(key));
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		@SuppressWarnings("unchecked")
+		List<T> list = query.list();
+		tx.commit();
+		session.close();
+		return  (T) list.get(0);
 	}
 
 	@Override
-	public List<T> selectAll() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<T> selectAll(Class<?> clazz) {
+		Session session = HibernateSessionFactory.getSessionFactory().openSession();
+		Transaction tx = session.beginTransaction();
+		Query query = session.createQuery("from " + clazz.getSimpleName());
+		@SuppressWarnings("unchecked")
+		List<T> list = query.list();
+		tx.commit();
+		session.close();
+		return list;	
 	}
-
 }

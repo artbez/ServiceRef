@@ -5,7 +5,7 @@ public class ExampleDomOne extends ExampleDOMTwo {
 	public int myNotKeyField;
 	
 	public ExampleDomOne(long objId, String name) {
-		super(objId, name);
+		super(objId);
 		// TODO Auto-generated constructor stub
 	}
 	
