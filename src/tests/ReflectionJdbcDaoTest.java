@@ -18,6 +18,7 @@ public class ReflectionJdbcDaoTest {
 	
 	ReflectionJdbcDaoImpl<ExampleDOMTwo> myRefService;
 	
+	// deletes records with id -1 and -2 (it is supposed that they are used only in tests)
 	@Before
 	public void prepare() {
 		
@@ -37,16 +38,18 @@ public class ReflectionJdbcDaoTest {
 		myRefService = new ReflectionJdbcDaoImpl<>();
 	}
 	
+	// inserts by ReflectionService and then checks by sql that exist
 	@Test
 	public void insertTest() {
 
 		Session session = HibernateSessionFactory.getSessionFactory().openSession(); 
 		ExampleDOMTwo myEx1 = new ExampleDOMTwo(new Long(-1));
-		myEx1.setName("test1");
+		myEx1.setName("testForInsert");
 		
 		myRefService.insert(myEx1);
 		
 		Query query = session.createQuery("from ExampleDOMTwo where objId = '-1'");
+		@SuppressWarnings("unchecked")
 		List<ExampleDOMTwo> list = query.list();
 		assertEquals(myEx1.getObjId(), list.get(0).getObjId());
 		assertEquals(myEx1.getName(), list.get(0).getName());		
@@ -54,37 +57,41 @@ public class ReflectionJdbcDaoTest {
 		session.close();
 	}
 	
+	// updates by ReflectionService and then checks by sql that it is correct
 	@Test
 	public void updateTest(){
 		
 		Session session = HibernateSessionFactory.getSessionFactory().openSession(); 
 		ExampleDOMTwo myEx1 = new ExampleDOMTwo(new Long(-1));
 		
-		myEx1.setName("test1");
+		myEx1.setName("testForUpdate");
 		myRefService.insert(myEx1);
 		
-		myEx1.setName("updatedTest1");
+		myEx1.setName("updatedTest");
 		myRefService.update(myEx1);
 		
 		Query query = session.createQuery("from ExampleDOMTwo where objId = '-1'");
+		@SuppressWarnings("unchecked")
 		List<ExampleDOMTwo> list = query.list();
 		assertEquals(myEx1.getName(), list.get(0).getName());
 		
 		session.close();
 	}
 	
+	// deletes by ReflectionService
 	@Test
 	public void deleteByKeyTest(){
 		
 		Session session = HibernateSessionFactory.getSessionFactory().openSession(); 
 		
 		ExampleDOMTwo myEx1 = new ExampleDOMTwo(new Long(-1));
-		myEx1.setName("testDelete");
+		myEx1.setName("testForDelete");
 		
 		session.beginTransaction();
 		Query query = session.createQuery("from  ExampleDOMTwo where objId = '-1'");
 		session.getTransaction().commit();
 		boolean exists = query.uniqueResult() != null;
+		// checks myEx1 is not in database
 		assertFalse(exists);
 		
 		myRefService.insert(myEx1);
@@ -92,6 +99,7 @@ public class ReflectionJdbcDaoTest {
 		query = session.createQuery("from  ExampleDOMTwo where objId = '-1'");
 		session.getTransaction().commit();
 		exists = query.uniqueResult() != null;
+		// checks myEx1 is in database
 		assertTrue(exists);
 		
 		myRefService.deleteByKey(myEx1);
@@ -99,6 +107,7 @@ public class ReflectionJdbcDaoTest {
 		query = session.createQuery("from  ExampleDOMTwo where objId = '-1'");
 		session.getTransaction().commit();
 		exists = query.uniqueResult() != null;
+		// checks myEx1 is not in database (delete was correct)
 		assertFalse(exists);
 		
 		session.close();
@@ -108,7 +117,7 @@ public class ReflectionJdbcDaoTest {
 	public void selectByKeyTest() {
 		
 		ExampleDOMTwo myEx1 = new ExampleDOMTwo(new Long(-1));
-		myEx1.setName("test1");
+		myEx1.setName("testForSelect");
 
 		myRefService.insert(myEx1);
 		
@@ -118,17 +127,18 @@ public class ReflectionJdbcDaoTest {
 		assertEquals(myEx1.name, myEx2.name);
 	}
 
+	// gets 2 lists from db and checks that they are the same
 	@Test
 	public void selectAllTest(){
 
 		Session session = HibernateSessionFactory.getSessionFactory().openSession(); 
 		
 		ExampleDOMTwo myEx1 = new ExampleDOMTwo(new Long(-1));
-		myEx1.setName("test1");
+		myEx1.setName("testForAllSelect");
 		myRefService.insert(myEx1);
 		
 		ExampleDOMTwo myEx2 = new ExampleDOMTwo(new Long(-2));
-		myEx1.setName("test2");
+		myEx2.setName("testForAllSelect2");
 		List<ExampleDOMTwo> mList = null;
 		try {
 			mList = myRefService.selectAll(Class.forName("DOMClasses.ExampleDOMTwo"));
@@ -138,6 +148,7 @@ public class ReflectionJdbcDaoTest {
 		
 		Transaction tx = session.beginTransaction();
 		Query query = session.createQuery("from ExampleDOMTwo");
+		@SuppressWarnings("unchecked")
 		List<ExampleDOMTwo> expectedList = query.list();
 		tx.commit();
 		

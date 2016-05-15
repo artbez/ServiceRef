@@ -27,22 +27,11 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 	public void update(T object) {
 		// TODO Auto-generated method stub
 		Class<? extends Object> clazz = object.getClass();
-		Field[] fields = clazz.getFields();
-		String fi = "";
-		for (Field field : fields)
-			try {
-				fi += field.getName() + " = \'" + field.get(object) + "\',";
-			} catch (IllegalArgumentException | IllegalAccessException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		
 		Session session = HibernateSessionFactory.getSessionFactory().openSession();
 		 
 		Transaction tx = session.beginTransaction();
-		fi = fi.substring(0, fi.length() - 1);
 		
-		String str = " set " + fi +	" where id = :id";
+		String str = " set " + getLineParameters(object) +	" where id = :id";
 		Query query = session.createQuery("update " + clazz.getSimpleName() + str);
 		try {
 			query.setParameter("id", clazz.getField("objId").get(object));
@@ -61,14 +50,10 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 		Class<? extends Object> clazz = key.getClass();
 		Session session = HibernateSessionFactory.getSessionFactory().openSession();
 		Transaction tx = session.beginTransaction();
+		
 		Query query = session.createQuery("delete " + clazz.getSimpleName() 
-				+ " where objId = :id");
-		try {
-			query.setParameter("id", clazz.getField("objId").get(key));
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				+ " where " + getLineParameters(key));
+		
 		query.executeUpdate();
 		tx.commit();
 		session.close();
@@ -79,16 +64,11 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 		// TODO Auto-generated method stub
 		Class<? extends Object> clazz = key.getClass();
 		Session session = HibernateSessionFactory.getSessionFactory().openSession();
+		
 		Transaction tx = session.beginTransaction();
 		Query query = session.createQuery("from " + clazz.getSimpleName() 
-				+ " where objId = :id");
-		try {
-			query.setParameter("id", clazz.getField("objId").get(key));
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		@SuppressWarnings("unchecked")
+				+ " where " + getLineParameters(key));
+		
 		List<T> list = query.list();
 		tx.commit();
 		session.close();
@@ -105,5 +85,21 @@ public class ReflectionJdbcDaoImpl<T> implements ReflectionJdbcDao<T>{
 		tx.commit();
 		session.close();
 		return list;	
+	}
+	
+	public String getLineParameters(T key) {
+		Class<? extends Object> clazz = key.getClass();
+		Field[] fields = clazz.getFields();
+		String fi = "";
+		for (Field field : fields)
+			try {
+				if (field.get(key) != null) 
+					fi += field.getName() + " = \'" + field.get(key) + "\', ";
+			} catch (IllegalArgumentException | IllegalAccessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		
+		return fi.substring(0, fi.length() - 2);
 	}
 }
